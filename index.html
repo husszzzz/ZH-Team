@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="موقع ZH Team لمشاهدة كرة القدم وكأس العالم بث مباشر">
-    <meta name="author" content="حسين الحسني وعبود سكوفيلد">
     <title>ZH Team | بث مباشر للمباريات</title>
     
     <!-- مكتبة HLS.js لتشغيل البث المباشر m3u8 -->
@@ -15,7 +14,7 @@
     
     <style>
         /* ========================================================
-           CSS Styles & Animations (بدون تغيير)
+           CSS Styles & Animations (نفس تصميمك الفخم بدون تغيير)
            ======================================================== */
         :root {
             --primary-color: #e50914; 
@@ -124,6 +123,7 @@
             width: 100%;
             height: 100%;
             outline: none;
+            background: #000;
         }
 
         .loader-overlay {
@@ -168,7 +168,6 @@
             font-weight: 800;
             color: #ffd700;
             text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-            animation: pulse 1s infinite;
         }
 
         .controls-section {
@@ -218,7 +217,7 @@
             box-shadow: 0 0 20px rgba(229, 9, 20, 0.4);
         }
 
-        /* تعديلات الروابط في الفوتر */
+        /* تعديلات الفوتر الخاصة بحسين وعبود */
         footer {
             margin-top: auto;
             width: 100%;
@@ -233,7 +232,7 @@
         }
         
         footer a {
-            text-decoration: none; /* إزالة خط الرابط */
+            text-decoration: none; 
         }
 
         footer span {
@@ -242,7 +241,7 @@
         }
         
         footer span:hover {
-            color: #ffd700; /* يتغير للذهبي عند تمرير الماوس */
+            color: #ffd700; 
         }
 
         @keyframes fadeInDown {
@@ -253,12 +252,6 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
         }
 
         @media (max-width: 600px) {
@@ -281,8 +274,8 @@
 
     <main class="player-wrapper">
         <div class="video-container">
-            <!-- إضافة playsinline لدعم الايفون -->
-            <video id="main-player" controls playsinline preload="auto"></video>
+            <!-- تمت إضافة webkit-playsinline لدعم أبل كما في الكود الخاص بصديقك -->
+            <video id="main-player" controls playsinline webkit-playsinline></video>
             
             <div id="loader" class="loader-overlay">
                 <div class="loader-text">
@@ -298,6 +291,7 @@
             
             <h2 class="channel-title">مشاهدة قناة BEIN SPORT 1</h2>
             <div class="buttons-grid">
+                <!-- الروابط مشفرة بـ Base64 للحماية -->
                 <button class="btn" onclick="playStream('aHR0cHM6Ly9mYWNreW91LWNkbjQuY2ZkL2lwdHYtMS9pbmRleC5tM3U4', this)">
                     البث الأول (سيرفر رئيسي)
                 </button>
@@ -339,87 +333,55 @@
     <script>
         const video = document.getElementById('main-player');
         const loader = document.getElementById('loader');
-        const timerDisplay = document.getElementById('countdown-timer');
+        const counter = document.getElementById('countdown-timer');
         let hls = null;
-        let countdownInterval;
+        let timer;
 
         function playStream(base64Url, buttonElement) {
+            // تصميم: تفعيل الزر المضغوط وإلغاء تفعيل البقية
             document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
             if(buttonElement) buttonElement.classList.add('active');
 
-            if (hls) {
-                hls.destroy();
-            }
-            video.pause();
-            video.removeAttribute('src');
-            video.load();
+            // فك تشفير الرابط
+            let url = atob(base64Url);
 
+            // إظهار شاشة التحميل (نفس لوجيك الكود الخاص بصديقك بس مدمج مع تصميمنا)
             loader.classList.add('active');
+            let sec = 3;
+            counter.textContent = sec;
             
-            let timeLeft = 3;
-            timerDisplay.innerText = timeLeft;
-
-            clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                timerDisplay.innerText = timeLeft;
-
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    loader.classList.remove('active');
-                    initStream(atob(base64Url));
+            clearInterval(timer);
+            timer = setInterval(() => {
+                sec--; 
+                if (sec > 0) {
+                    counter.textContent = sec;
                 }
             }, 1000);
-        }
 
-        // تحديث طريقة التهيئة لتكون أكثر توافقية
-        function initStream(streamUrl) {
+            // تدمير البث القديم
+            if (hls) hls.destroy();
+
+            // تطبيق نفس هندسة الكود الخاص بصديقك بالضبط لضمان التشغيل
             if (Hls.isSupported()) {
-                hls = new Hls({
-                    maxBufferLength: 30,
-                    liveSyncDurationCount: 3,
-                    enableWorker: true
-                });
-                
-                // ربط الميديا أولاً قبل تحميل الرابط (الطريقة الأفضل)
+                hls = new Hls(); 
+                hls.loadSource(url);
                 hls.attachMedia(video);
-                
-                hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                    hls.loadSource(streamUrl);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    setTimeout(() => video.play().catch(() => {}), 3000); 
                 });
-                
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    video.play().catch(e => console.log("التشغيل يحتاج نقرة إضافية من المستخدم"));
-                });
-                
-                // تتبع الأخطاء (تفيدك بمعرفة اذا كان السبب CORS)
-                hls.on(Hls.Events.ERROR, function (event, data) {
-                    if (data.fatal) {
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.error("خطأ في الشبكة - غالبا بسبب حماية CORS من السيرفر الأصلي");
-                                hls.startLoad();
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                hls.recoverMediaError();
-                                break;
-                            default:
-                                hls.destroy();
-                                break;
-                        }
-                    }
-                });
-                
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // مخصص لسفاري في أجهزة آبل
-                video.src = streamUrl;
-                video.addEventListener('loadedmetadata', function () {
-                    video.play();
-                });
+            } else {
+                video.src = url;
+                setTimeout(() => video.play().catch(() => {}), 3000);
             }
+
+            // إخفاء العداد فقط عندما يشتغل البث فعلياً (خطوة ذكية من كود صديقك)
+            video.onplaying = () => {
+                clearInterval(timer);
+                loader.classList.remove('active');
+            };
         }
 
-        // الحماية
+        // الحماية 
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         document.onkeydown = function(e) {
