@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZH Team | المشغل المباشر</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; user-select: none; }
+        
+        body {
+            background-color: #000;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+
+        .video-container {
+            position: relative; width: 100%; height: 100%; background-color: #000;
+        }
+
+        video { width: 100%; height: 100%; outline: none; object-fit: contain; }
+
+        .loader-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 10; color: #fff;
+        }
+
+        .loader-text {
+            font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 20px; line-height: 1.6;
+        }
+
+        .loader-text span { color: #e50914; }
+
+        .countdown {
+            font-size: 70px; font-weight: 800; color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        /* حقوق شفافة داخل المشغل */
+        .watermark {
+            position: absolute; bottom: 20px; right: 20px;
+            font-size: 16px; font-weight: bold; color: rgba(255, 255, 255, 0.4);
+            pointer-events: none; z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-container">
+        <video id="main-player" controls playsinline webkit-playsinline></video>
+        
+        <div id="loader" class="loader-overlay">
+            <div class="loader-text">
+                جاري تجهيز البث<br>
+                تابع المحتوى حصريا على قناتي <br>
+                <span>@hassanyIPA</span> و <span>@C9_9P</span>
+            </div>
+            <div id="countdown-timer" class="countdown">3</div>
+        </div>
+
+        <div class="watermark">ZH Team</div>
+    </div>
+
+    <script>
+        const video = document.getElementById('main-player');
+        const loader = document.getElementById('loader');
+        const counter = document.getElementById('countdown-timer');
+        let hls = null;
+        let timer;
+
+        // استخراج الرابط المشفر من شريط المتصفح
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedUrl = urlParams.get('ch');
+
+        if (encodedUrl) {
+            try {
+                // فك التشفير
+                let streamUrl = atob(encodedUrl);
+                
+                // تشغيل العداد والتأخير نفس نظام كود صاحبك
+                let sec = 3;
+                counter.textContent = sec;
+                
+                timer = setInterval(() => {
+                    sec--; 
+                    if (sec > 0) counter.textContent = sec;
+                }, 1000);
+
+                // تهيئة مشغل HLS
+                if (Hls.isSupported()) {
+                    hls = new Hls(); 
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        setTimeout(() => video.play().catch(() => {}), 3000); 
+                    });
+                } else {
+                    video.src = streamUrl;
+                    setTimeout(() => video.play().catch(() => {}), 3000);
+                }
+
+                // إخفاء التحميل عند بدء التشغيل الفعلي
+                video.onplaying = () => {
+                    clearInterval(timer);
+                    loader.style.display = 'none';
+                };
+
+            } catch (e) {
+                loader.innerHTML = '<div class="loader-text">خطأ: الرابط غير صالح!</div>';
+            }
+        } else {
+            loader.innerHTML = '<div class="loader-text">لم يتم تحديد أي بث للتشغيل!</div>';
+        }
+
+        // الحماية (ممنوع الكليك يمين واختصارات المطورين)
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        }
+        document.ondragstart = function() { return false; }
+    </script>
+</body>
+</html>
