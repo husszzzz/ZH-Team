@@ -7,16 +7,18 @@
     <meta name="author" content="حسين الحسني وعبود سكوفيلد">
     <title>ZH Team | بث مباشر للمباريات</title>
     
+    <!-- مكتبة HLS.js لتشغيل البث المباشر m3u8 -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     
+    <!-- الخطوط العربية من Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     
     <style>
         /* ========================================================
-           CSS Styles & Animations
+           CSS Styles & Animations (بدون تغيير)
            ======================================================== */
         :root {
-            --primary-color: #e50914; /* لون رياضي احترافي */
+            --primary-color: #e50914; 
             --dark-glass: rgba(15, 15, 20, 0.7);
             --light-glass: rgba(255, 255, 255, 0.1);
             --text-main: #ffffff;
@@ -28,12 +30,12 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Tajawal', sans-serif;
-            user-select: none; /* منع تحديد النص */
+            user-select: none; 
         }
 
         body {
             background-color: #000;
-            background-image: url('https://l.top4top.io/p_3844ry0pt0.jpeg'); /* صورة الخلفية */
+            background-image: url('https://l.top4top.io/p_3844ry0pt0.jpeg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -44,7 +46,6 @@
             align-items: center;
         }
 
-        /* تأثير الطبقة الداكنة فوق الخلفية */
         .overlay-bg {
             position: fixed;
             top: 0;
@@ -56,7 +57,6 @@
             z-index: -1;
         }
 
-        /* ================= Header ================= */
         header {
             width: 100%;
             max-width: 900px;
@@ -88,7 +88,7 @@
 
         .rights-msg {
             font-size: 16px;
-            color: #ffd700; /* لون ذهبي */
+            color: #ffd700; 
             font-weight: 700;
             background: rgba(0, 0, 0, 0.5);
             display: inline-block;
@@ -98,7 +98,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* ================= Player Section ================= */
         .player-wrapper {
             width: 100%;
             max-width: 900px;
@@ -127,7 +126,6 @@
             outline: none;
         }
 
-        /* Loader & Countdown Overlay */
         .loader-overlay {
             position: absolute;
             top: 0;
@@ -173,7 +171,6 @@
             animation: pulse 1s infinite;
         }
 
-        /* ================= Controls ================= */
         .controls-section {
             margin-top: 30px;
         }
@@ -221,7 +218,7 @@
             box-shadow: 0 0 20px rgba(229, 9, 20, 0.4);
         }
 
-        /* ================= Footer ================= */
+        /* تعديلات الروابط في الفوتر */
         footer {
             margin-top: auto;
             width: 100%;
@@ -235,11 +232,19 @@
             letter-spacing: 1px;
         }
         
-        footer span {
-            color: var(--primary-color);
+        footer a {
+            text-decoration: none; /* إزالة خط الرابط */
         }
 
-        /* ================= Animations ================= */
+        footer span {
+            color: var(--primary-color);
+            transition: color 0.3s;
+        }
+        
+        footer span:hover {
+            color: #ffd700; /* يتغير للذهبي عند تمرير الماوس */
+        }
+
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -256,7 +261,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Responsive */
         @media (max-width: 600px) {
             .welcome-msg { font-size: 22px; }
             .rights-msg { font-size: 14px; }
@@ -277,7 +281,8 @@
 
     <main class="player-wrapper">
         <div class="video-container">
-            <video id="main-player" controls preload="auto"></video>
+            <!-- إضافة playsinline لدعم الايفون -->
+            <video id="main-player" controls playsinline preload="auto"></video>
             
             <div id="loader" class="loader-overlay">
                 <div class="loader-text">
@@ -322,9 +327,15 @@
     </main>
 
     <footer>
-        تم البرمجة بواسطة <span>حسين الحسني</span> و <span>عبود سكوفيلد</span>
+        تم البرمجة بواسطة 
+        <a href="https://t.me/hassanyIPA" target="_blank"><span>حسين الحسني</span></a> 
+        و 
+        <a href="https://t.me/C9_9P" target="_blank"><span>عبود سكوفيلد</span></a>
     </footer>
 
+    <!-- ========================================================
+         JavaScript Logic & Security
+         ======================================================== -->
     <script>
         const video = document.getElementById('main-player');
         const loader = document.getElementById('loader');
@@ -332,14 +343,10 @@
         let hls = null;
         let countdownInterval;
 
-        // دالة تشغيل البث مع العداد
         function playStream(base64Url, buttonElement) {
-            // إزالة الكلاس 'active' من كل الأزرار
             document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-            // إضافة الكلاس 'active' للزر المضغوط
             if(buttonElement) buttonElement.classList.add('active');
 
-            // إيقاف أي بث حالي
             if (hls) {
                 hls.destroy();
             }
@@ -347,7 +354,6 @@
             video.removeAttribute('src');
             video.load();
 
-            // إظهار شاشة التحميل
             loader.classList.add('active');
             
             let timeLeft = 3;
@@ -360,29 +366,52 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(countdownInterval);
-                    // إخفاء الشاشة بعد انتهاء العداد
                     loader.classList.remove('active');
-                    // فك تشفير الرابط وبدء البث
                     initStream(atob(base64Url));
                 }
             }, 1000);
         }
 
-        // دالة تهيئة HLS.js
+        // تحديث طريقة التهيئة لتكون أكثر توافقية
         function initStream(streamUrl) {
             if (Hls.isSupported()) {
                 hls = new Hls({
-                    // إعدادات لتقليل التقطيع
                     maxBufferLength: 30,
-                    liveSyncDurationCount: 3
+                    liveSyncDurationCount: 3,
+                    enableWorker: true
                 });
-                hls.loadSource(streamUrl);
+                
+                // ربط الميديا أولاً قبل تحميل الرابط (الطريقة الأفضل)
                 hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    video.play().catch(e => console.log("التشغيل التلقائي يحتاج تفاعل المستخدم"));
+                
+                hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                    hls.loadSource(streamUrl);
                 });
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    video.play().catch(e => console.log("التشغيل يحتاج نقرة إضافية من المستخدم"));
+                });
+                
+                // تتبع الأخطاء (تفيدك بمعرفة اذا كان السبب CORS)
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.error("خطأ في الشبكة - غالبا بسبب حماية CORS من السيرفر الأصلي");
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                hls.destroy();
+                                break;
+                        }
+                    }
+                });
+                
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // دعم متصفحات سفاري الافتراضي
+                // مخصص لسفاري في أجهزة آبل
                 video.src = streamUrl;
                 video.addEventListener('loadedmetadata', function () {
                     video.play();
@@ -390,30 +419,18 @@
             }
         }
 
-        // ==========================================
-        // طبقات الحماية (منع السرقة قدر الإمكان)
-        // ==========================================
-
-        // 1. منع كليك يمين
+        // الحماية
         document.addEventListener('contextmenu', event => event.preventDefault());
 
-        // 2. منع اختصارات لوحة المفاتيح للمطورين (F12, Ctrl+Shift+I, Ctrl+U)
         document.onkeydown = function(e) {
-            if(e.keyCode == 123) { return false; } // F12
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } // Ctrl+Shift+I
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } // Ctrl+Shift+C
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } // Ctrl+Shift+J
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } // Ctrl+U
+            if(e.keyCode == 123) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } 
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } 
         }
 
-        // 3. منع سحب وإفلات العناصر للحماية
         document.ondragstart = function() { return false; }
-
-        // تشغيل أول سيرفر تلقائياً عند فتح الموقع (اختياري، يمكنك حذفه)
-        // setTimeout(() => {
-        //    document.querySelector('.btn').click();
-        // }, 500);
-
     </script>
 </body>
 </html>
