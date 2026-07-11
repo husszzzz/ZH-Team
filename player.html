@@ -21,7 +21,7 @@
             position: relative; width: 100%; height: 100%; background-color: #000;
         }
 
-        video { width: 100%; height: 100%; outline: none; object-fit: contain; }
+        video { width: 100%; height: 100%; outline: none; object-fit: contain; background: #000; }
 
         .loader-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -40,7 +40,6 @@
             text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
         }
 
-        /* حقوق شفافة داخل المشغل */
         .watermark {
             position: absolute; bottom: 20px; right: 20px;
             font-size: 16px; font-weight: bold; color: rgba(255, 255, 255, 0.4);
@@ -72,9 +71,8 @@
         let hls = null;
         let timer;
 
-        // استخراج الرابط المشفر من شريط المتصفح
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedUrl = urlParams.get('ch');
+        // استخراج الرابط المشفر من الذاكرة المحلية (LocalStorage)
+        const encodedUrl = localStorage.getItem('zh_stream_key');
 
         if (encodedUrl) {
             try {
@@ -91,6 +89,8 @@
                 }, 1000);
 
                 // تهيئة مشغل HLS
+                if (hls) hls.destroy();
+
                 if (Hls.isSupported()) {
                     hls = new Hls(); 
                     hls.loadSource(streamUrl);
@@ -99,21 +99,22 @@
                         setTimeout(() => video.play().catch(() => {}), 3000); 
                     });
                 } else {
+                    // لمستخدمي سفاري وآبل
                     video.src = streamUrl;
                     setTimeout(() => video.play().catch(() => {}), 3000);
                 }
 
-                // إخفاء التحميل عند بدء التشغيل الفعلي
+                // إخفاء التحميل عند بدء التشغيل الفعلي للفيديو
                 video.onplaying = () => {
                     clearInterval(timer);
                     loader.style.display = 'none';
                 };
 
             } catch (e) {
-                loader.innerHTML = '<div class="loader-text">خطأ: الرابط غير صالح!</div>';
+                loader.innerHTML = '<div class="loader-text">حدث خطأ أثناء فك تشفير البث!</div>';
             }
         } else {
-            loader.innerHTML = '<div class="loader-text">لم يتم تحديد أي بث للتشغيل!</div>';
+            loader.innerHTML = '<div class="loader-text">الرجاء اختيار البث من الصفحة الرئيسية أولاً</div>';
         }
 
         // الحماية (ممنوع الكليك يمين واختصارات المطورين)
